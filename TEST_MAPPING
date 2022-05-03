@@ -2589,9 +2589,6 @@
   ],
   "hwasan-presubmit": [
     {
-      "name": "CtsJdwpTestCases"
-    },
-    {
       "name": "BootImageProfileTest"
     },
     {
@@ -3832,9 +3829,6 @@
     },
     {
       "name": "art_standalone_cmdline_tests"
-    },
-    {
-      "name": "art_standalone_compiler_tests"
     },
     {
       "name": "art_standalone_dexdump_tests"
