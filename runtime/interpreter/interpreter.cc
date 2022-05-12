@@ -287,7 +287,6 @@ static inline JValue Execute(
       }
       if (UNLIKELY(self->IsExceptionPending())) {
         instrumentation->MethodUnwindEvent(self,
-                                           shadow_frame.GetThisObject(accessor.InsSize()),
                                            method,
                                            0);
         JValue ret = JValue();
