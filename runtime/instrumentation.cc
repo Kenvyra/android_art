@@ -375,7 +375,7 @@ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_c
     REQUIRES_SHARED(Locks::mutator_lock_) {
   // Use instrumentation entrypoints if instrumentation is installed.
   if (UNLIKELY(EntryExitStubsInstalled()) && !IsProxyInit(method)) {
-    if (!method->IsNative() && InterpretOnly()) {
+    if (!method->IsNative() && InterpretOnly(method)) {
       UpdateEntryPoints(method, GetQuickToInterpreterBridge());
     } else {
       UpdateEntryPoints(method, GetQuickInstrumentationEntryPoint());
@@ -383,7 +383,7 @@ void Instrumentation::InitializeMethodsCode(ArtMethod* method, const void* aot_c
     return;
   }
 
-  if (UNLIKELY(IsForcedInterpretOnly())) {
+  if (UNLIKELY(IsForcedInterpretOnly() || IsDeoptimized(method))) {
     UpdateEntryPoints(
         method, method->IsNative() ? GetQuickGenericJniStub() : GetQuickToInterpreterBridge());
     return;
@@ -639,19 +639,17 @@ static void InstrumentationRestoreStack(Thread* thread, void* arg)
         }
         return true;  // Ignore shadow frames.
       }
-      if (m == nullptr || m->IsRuntimeMethod()) {
+      if (m == nullptr) {
         if (kVerboseInstrumentation) {
-          LOG(INFO) << "  Skipping upcall / runtime method. Frame " << GetFrameId();
+          LOG(INFO) << "  Skipping upcall. Frame " << GetFrameId();
         }
         return true;  // Ignore upcalls and runtime methods.
       }
       const OatQuickMethodHeader* method_header = GetCurrentOatQuickMethodHeader();
-      // For JITed frames, we don't install instrumentation stubs.
       if (method_header != nullptr && method_header->HasShouldDeoptimizeFlag()) {
         if (IsShouldDeoptimizeFlagForDebugSet()) {
           runtime_methods_need_deopt_check_ = true;
         }
-        return true;
       }
       auto it = instrumentation_stack_->find(GetReturnPcAddr());
       if (it != instrumentation_stack_->end()) {
@@ -905,11 +903,6 @@ void Instrumentation::ConfigureStubs(const char* key, InstrumentationLevel desir
   UpdateStubs();
 }
 
-void Instrumentation::EnableSingleThreadDeopt(const char* key) {
-  // Prepare for single thread deopt by installing instrumentation stubs.
-  ConfigureStubs(key, InstrumentationLevel::kInstrumentWithInstrumentationStubs);
-}
-
 void Instrumentation::UpdateInstrumentationLevel(InstrumentationLevel requested_level) {
   instrumentation_level_ = requested_level;
 }
@@ -931,7 +924,9 @@ void Instrumentation::MaybeRestoreInstrumentationStack() {
   Locks::mutator_lock_->AssertExclusiveHeld(self);
   Runtime::Current()->GetThreadList()->ForEach([&](Thread* t) NO_THREAD_SAFETY_ANALYSIS {
     no_remaining_deopts =
-        no_remaining_deopts && !t->IsForceInterpreter() &&
+        no_remaining_deopts &&
+        !t->IsForceInterpreter() &&
+        !t->HasDebuggerShadowFrames() &&
         std::all_of(t->GetInstrumentationStack()->cbegin(),
                     t->GetInstrumentationStack()->cend(),
                     [&](const auto& frame) REQUIRES_SHARED(Locks::mutator_lock_) {
@@ -1067,7 +1062,7 @@ std::string Instrumentation::EntryPointString(const void* code) {
 }
 
 void Instrumentation::UpdateMethodsCodeImpl(ArtMethod* method, const void* new_code) {
-  if (!EntryExitStubsInstalled()) {
+  if (!AreExitStubsInstalled()) {
     // Fast path: no instrumentation.
     DCHECK(!IsDeoptimized(method));
     UpdateEntryPoints(method, new_code);
@@ -1088,7 +1083,7 @@ void Instrumentation::UpdateMethodsCodeImpl(ArtMethod* method, const void* new_c
     return;
   }
 
-  if (CodeNeedsEntryExitStub(new_code, method)) {
+  if (EntryExitStubsInstalled() && CodeNeedsEntryExitStub(new_code, method)) {
     DCHECK(method->GetEntryPointFromQuickCompiledCode() == GetQuickInstrumentationEntryPoint() ||
         class_linker->IsQuickToInterpreterBridge(method->GetEntryPointFromQuickCompiledCode()))
               << EntryPointString(method->GetEntryPointFromQuickCompiledCode())
