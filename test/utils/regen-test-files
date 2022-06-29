@@ -203,6 +203,8 @@ known_failing_tests = frozenset([
   "826-infinite-loop",
   # 832-cha-recursive: Dependency on `libarttest`.
   "832-cha-recursive",
+  # 837-deopt: Dependency on `libarttest`.
+  "837-deopt",
 ])
 
 # ART gtests that do not need root access to the device.
