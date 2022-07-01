@@ -749,7 +749,7 @@ void Jit::NotifyZygoteCompilationDone() {
 
 class ScopedCompilation {
  public:
-  ScopedCompilation(ScopedCompilation&& other) :
+  ScopedCompilation(ScopedCompilation&& other) noexcept :
       jit_(other.jit_),
       method_(other.method_),
       compilation_kind_(other.compilation_kind_),
