@@ -1421,7 +1421,7 @@ class MANAGED Class final : public Object {
       REQUIRES_SHARED(Locks::mutator_lock_) REQUIRES(!Roles::uninterruptible_);
 
   // 'Class' Object Fields
-  // Order governed by java field ordering. See art::ClassLinker::LinkFields.
+  // Order governed by java field ordering. See art::ClassLinker::LinkFieldsHelper::LinkFields.
 
   // Defining class loader, or null for the "bootstrap" system loader.
   HeapReference<ClassLoader> class_loader_;
