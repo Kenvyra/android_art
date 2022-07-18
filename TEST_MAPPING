@@ -902,6 +902,9 @@
       "name": "art-run-test-566-checker-codegen-select[com.google.android.art.apex]"
     },
     {
+      "name": "art-run-test-567-checker-builder-intrinsics[com.google.android.art.apex]"
+    },
+    {
       "name": "art-run-test-568-checker-onebit[com.google.android.art.apex]"
     },
     {
@@ -2200,6 +2203,9 @@
       "name": "art-run-test-566-checker-codegen-select"
     },
     {
+      "name": "art-run-test-567-checker-builder-intrinsics"
+    },
+    {
       "name": "art-run-test-568-checker-onebit"
     },
     {
@@ -3490,6 +3496,9 @@
     },
     {
       "name": "art-run-test-566-checker-codegen-select"
+    },
+    {
+      "name": "art-run-test-567-checker-builder-intrinsics"
     },
     {
       "name": "art-run-test-568-checker-onebit"
