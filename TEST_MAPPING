@@ -1232,9 +1232,6 @@
       "name": "art-run-test-838-override[com.google.android.art.apex]"
     },
     {
-      "name": "art-run-test-839-clinit-throw[com.google.android.art.apex]"
-    },
-    {
       "name": "art-run-test-963-default-range-smali[com.google.android.art.apex]"
     },
     {
@@ -2542,9 +2539,6 @@
       "name": "art-run-test-838-override"
     },
     {
-      "name": "art-run-test-839-clinit-throw"
-    },
-    {
       "name": "art-run-test-963-default-range-smali"
     },
     {
@@ -3844,9 +3838,6 @@
     },
     {
       "name": "art-run-test-838-override"
-    },
-    {
-      "name": "art-run-test-839-clinit-throw"
     },
     {
       "name": "art-run-test-963-default-range-smali"
