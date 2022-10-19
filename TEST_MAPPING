@@ -410,9 +410,6 @@
       "name": "art-run-test-2231-checker-heap-poisoning[com.google.android.art.apex]"
     },
     {
-      "name": "art-run-test-2232-write-metrics-to-log[com.google.android.art.apex]"
-    },
-    {
       "name": "art-run-test-2233-checker-remove-loop-suspend-check[com.google.android.art.apex]"
     },
     {
@@ -1720,9 +1717,6 @@
       "name": "art-run-test-2231-checker-heap-poisoning"
     },
     {
-      "name": "art-run-test-2232-write-metrics-to-log"
-    },
-    {
       "name": "art-run-test-2233-checker-remove-loop-suspend-check"
     },
     {
@@ -3025,9 +3019,6 @@
     },
     {
       "name": "art-run-test-2231-checker-heap-poisoning"
-    },
-    {
-      "name": "art-run-test-2232-write-metrics-to-log"
     },
     {
       "name": "art-run-test-2233-checker-remove-loop-suspend-check"
