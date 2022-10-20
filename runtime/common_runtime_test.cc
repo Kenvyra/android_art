@@ -158,12 +158,13 @@ void CommonRuntimeTestImpl::FinalizeSetup() {
 
   {
     ScopedObjectAccess soa(Thread::Current());
+    runtime_->GetClassLinker()->RunEarlyRootClinits(soa.Self());
+    WellKnownClasses::Init(Thread::Current()->GetJniEnv());
     runtime_->RunRootClinits(soa.Self());
   }
 
   // We're back in native, take the opportunity to initialize well known classes and ensure
   // intrinsics are initialized.
-  WellKnownClasses::Init(Thread::Current()->GetJniEnv());
   InitializeIntrinsics();
 
   // Create the heap thread pool so that the GC runs in parallel for tests. Normally, the thread
