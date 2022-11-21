@@ -2840,7 +2840,7 @@ class JNI {
       return JNIGlobalRefType;
     case kWeakGlobal:
       return JNIWeakGlobalRefType;
-    case kJniTransitionOrInvalid:
+    case kJniTransition:
       // Assume value is in a JNI transition frame.
       return JNILocalRefType;
     }
