@@ -493,7 +493,7 @@ inline ObjPtr<mirror::DexCache> ArtMethod::GetDexCache() {
     return klass->GetDexCache<kDefaultVerifyFlags, kReadBarrierOption>();
   } else {
     DCHECK(!IsProxyMethod());
-    return GetObsoleteDexCache();
+    return GetObsoleteDexCache<kReadBarrierOption>();
   }
 }
 
