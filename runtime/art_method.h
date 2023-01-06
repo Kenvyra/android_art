@@ -418,8 +418,8 @@ class ArtMethod final {
   }
 
   void SetMustCountLocks() REQUIRES_SHARED(Locks::mutator_lock_) {
-    AddAccessFlags(kAccMustCountLocks);
     ClearAccessFlags(kAccSkipAccessChecks);
+    AddAccessFlags(kAccMustCountLocks);
   }
 
   bool HasNterpEntryPointFastPathFlag() const {
