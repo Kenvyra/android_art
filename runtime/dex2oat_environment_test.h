@@ -240,7 +240,7 @@ class Dex2oatEnvironmentTest : public CommonRuntimeTest {
     ASSERT_TRUE(vdex_file->ReadFully(data.data(), data.size()));
 
     // Zip the content.
-    FILE* file = fopen(out_dm.c_str(), "wb");
+    FILE* file = fopen(out_dm.c_str(), "wbe");
     ZipWriter writer(file);
     writer.StartEntry("primary.vdex", ZipWriter::kAlign32);
     writer.WriteBytes(data.data(), data.size());
