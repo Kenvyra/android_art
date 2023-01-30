@@ -1091,6 +1091,7 @@ const OatFile* OatFileAssistant::OatFileInfo::GetFile() {
       file_.reset(OatFile::OpenFromVdex(zip_fd_,
                                         std::move(vdex),
                                         oat_file_assistant_->dex_location_,
+                                        oat_file_assistant_->context_,
                                         &error_msg));
     }
   } else if (android::base::EndsWith(filename_, kDmExtension)) {
@@ -1103,6 +1104,7 @@ const OatFile* OatFileAssistant::OatFileInfo::GetFile() {
         file_.reset(OatFile::OpenFromVdex(zip_fd_,
                                           std::move(vdex),
                                           oat_file_assistant_->dex_location_,
+                                          oat_file_assistant_->context_,
                                           &error_msg));
       }
     }

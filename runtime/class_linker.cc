@@ -1370,6 +1370,7 @@ bool ClassLinker::InitFromBootImage(std::string* error_msg) {
     std::vector<std::unique_ptr<const DexFile>> dex_files;
     if (!AddImageSpace(spaces[i],
                        ScopedNullHandle<mirror::ClassLoader>(),
+                       /* class_loader_context= */ nullptr,
                        /*out*/&dex_files,
                        error_msg)) {
       return false;
@@ -1942,6 +1943,7 @@ static void VerifyAppImage(const ImageHeader& header,
 bool ClassLinker::AddImageSpace(
     gc::space::ImageSpace* space,
     Handle<mirror::ClassLoader> class_loader,
+    ClassLoaderContext* context,
     std::vector<std::unique_ptr<const DexFile>>* out_dex_files,
     std::string* error_msg) {
   DCHECK(out_dex_files != nullptr);
@@ -2024,19 +2026,30 @@ bool ClassLinker::AddImageSpace(
     if (special_root == nullptr) {
       *error_msg = "Unexpected null special root in app image";
       return false;
-    } else if (special_root->IsIntArray()) {
-      size_t count = special_root->AsIntArray()->GetLength();
+    } else if (special_root->IsObjectArray()) {
+      ObjPtr<mirror::IntArray> checksums =
+          special_root->AsObjectArray<mirror::Object>()->Get(1)->AsIntArray();
+      size_t count = checksums->GetLength();
       if (oat_file->GetVdexFile()->GetNumberOfDexFiles() != count) {
         *error_msg = "Cheksums count does not match";
         return false;
       }
       static_assert(sizeof(VdexFile::VdexChecksum) == sizeof(int32_t));
       const VdexFile::VdexChecksum* art_checksums =
-          reinterpret_cast<VdexFile::VdexChecksum*>(special_root->AsIntArray()->GetData());
+          reinterpret_cast<VdexFile::VdexChecksum*>(checksums->GetData());
       const VdexFile::VdexChecksum* vdex_checksums =
           oat_file->GetVdexFile()->GetDexChecksumsArray();
       if (memcmp(art_checksums, vdex_checksums, sizeof(VdexFile::VdexChecksum) * count) != 0) {
         *error_msg = "Image and vdex cheksums did not match";
+        return false;
+      }
+      ObjPtr<mirror::String> encoded_context =
+          special_root->AsObjectArray<mirror::Object>()->Get(0)->AsString();
+      std::string encoded_context_str = encoded_context->ToModifiedUtf8();
+      if (context->VerifyClassLoaderContextMatch(encoded_context_str.c_str()) ==
+              ClassLoaderContext::VerificationResult::kMismatch) {
+        *error_msg =
+            StringPrintf("Class loader contexts don't match: %s", encoded_context_str.c_str());
         return false;
       }
     } else if (IsBootClassLoader(special_root.Get())) {
@@ -2152,9 +2165,11 @@ bool ClassLinker::AddImageSpace(
         ObjPtr<mirror::Class> klass(root.Read());
         // Do not update class loader for boot image classes where the app image
         // class loader is only the initiating loader but not the defining loader.
-        // Avoid read barrier since we are comparing against null.
-        if (klass->GetClassLoader<kDefaultVerifyFlags, kWithoutReadBarrier>() != nullptr) {
+        if (space->HasAddress(klass.Ptr())) {
           klass->SetClassLoader(loader);
+        } else {
+          DCHECK(klass->IsBootStrapClassLoaded());
+          DCHECK(Runtime::Current()->GetHeap()->ObjectIsInBootImageSpace(klass.Ptr()));
         }
       }
     }
