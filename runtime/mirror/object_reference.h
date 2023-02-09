@@ -153,6 +153,9 @@ class MANAGED ObjectReference {
   explicit ObjectReference(MirrorType* mirror_ptr) REQUIRES_SHARED(Locks::mutator_lock_)
       : reference_(Compression::Compress(mirror_ptr)) {
   }
+  ObjectReference() : reference_(0u) {
+    DCHECK(IsNull());
+  }
 
   // The encoded reference to a mirror::Object.
   uint32_t reference_;
@@ -218,8 +221,8 @@ static_assert(sizeof(mirror::HeapReference<mirror::Object>) == kHeapReferenceSiz
 template<class MirrorType>
 class MANAGED CompressedReference : public mirror::ObjectReference<false, MirrorType> {
  public:
-  CompressedReference<MirrorType>() REQUIRES_SHARED(Locks::mutator_lock_)
-      : mirror::ObjectReference<false, MirrorType>(nullptr) {}
+  CompressedReference<MirrorType>()
+      : mirror::ObjectReference<false, MirrorType>() {}
 
   static CompressedReference<MirrorType> FromMirrorPtr(MirrorType* p)
       REQUIRES_SHARED(Locks::mutator_lock_) {
@@ -227,7 +230,7 @@ class MANAGED CompressedReference : public mirror::ObjectReference<false, Mirror
   }
 
   static CompressedReference<MirrorType> FromVRegValue(uint32_t vreg_value) {
-    CompressedReference<MirrorType> result(nullptr);
+    CompressedReference<MirrorType> result;
     result.reference_ = vreg_value;
     return result;
   }
